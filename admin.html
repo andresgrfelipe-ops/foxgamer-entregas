@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f4f6f9" />
+  <title>Administración | FOX GAMER Entregas</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="admin-shell">
+  <header class="admin-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">🦊</span>
+      <span class="brand-copy"><strong>FOX GAMER</strong><small>ENTREGAS</small></span>
+    </a>
+    <a class="secondary-btn" href="/">Ver seguimiento</a>
+  </header>
+
+  <main class="admin-main">
+    <div class="admin-title">
+      <div>
+        <h1>Panel de entregas</h1>
+        <p>Crea guías y actualiza el estado de los pedidos.</p>
+      </div>
+      <button id="export-btn" class="secondary-btn">Exportar respaldo</button>
+    </div>
+
+    <div class="dashboard-grid">
+      <section class="panel">
+        <h2>Nueva guía</h2>
+        <form id="guide-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="guide">Número de guía</label>
+              <input id="guide" name="guide" placeholder="FG-2026-000001" required />
+            </div>
+            <div class="field">
+              <label for="status">Estado</label>
+              <select id="status" name="status">
+                <option>Guía creada</option>
+                <option>Recogido</option>
+                <option>En centro logístico</option>
+                <option>En tránsito</option>
+                <option>En reparto</option>
+                <option>Entregado</option>
+                <option>Novedad</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="customer">Cliente</label>
+              <input id="customer" name="customer" placeholder="Nombre del cliente" />
+            </div>
+            <div class="field">
+              <label for="city">Ciudad / destino</label>
+              <input id="city" name="city" placeholder="Ciudad, departamento" />
+            </div>
+            <div class="field full">
+              <label for="item">Artículo / pedido</label>
+              <input id="item" name="item" placeholder="Ej. PlayStation 5 Pro" />
+            </div>
+            <div class="field full">
+              <label for="note">Nota inicial</label>
+              <textarea id="note" name="note" placeholder="Información adicional"></textarea>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="primary-btn" type="submit">Guardar guía</button>
+            <button id="generate-btn" class="secondary-btn" type="button">Generar número</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Guías registradas</h2>
+        <div id="guide-list" class="guide-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="/admin.js"></script>
+</body>
+</html>
