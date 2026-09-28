@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0e1220" />
+  <title>FOX GAMER Entregas | Seguimiento</title>
+  <meta name="description" content="Consulta el estado de tu pedido FOX GAMER con tu número de guía." />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="FOX GAMER Entregas">
+      <span class="brand-mark" aria-hidden="true">🦊</span>
+      <span class="brand-copy">
+        <strong>FOX GAMER</strong>
+        <small>ENTREGAS</small>
+      </span>
+    </a>
+    <a class="admin-link" href="/admin.html">Admin</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">🛡️ SEGUIMIENTO SEGURO</div>
+        <h1>¿Dónde está tu pedido?</h1>
+        <p>Consulta el recorrido de tu compra FOX GAMER con el número de guía recibido.</p>
+
+        <form id="tracking-form" class="tracking-card" autocomplete="off">
+          <label class="sr-only" for="guide">Número de guía</label>
+          <div class="tracking-input-wrap">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input id="guide" name="guide" placeholder="Ej. FG-2026-052756" maxlength="40" required />
+          </div>
+          <button type="submit">Consultar guía</button>
+        </form>
+
+        <p class="privacy-note">🛡️ Protegemos tus datos personales durante la consulta.</p>
+        <div id="tracking-result" class="tracking-result" aria-live="polite"></div>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit">
+          <div class="package">📦</div>
+          <div class="truck">🚚</div>
+          <span>FOX<br>GAMER</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-strip">
+      <div>
+        <strong>🛡️ Seguimiento oficial FOX GAMER</strong>
+        <span>Consulta tu guía desde cualquier dispositivo.</span>
+      </div>
+      <a class="whatsapp" href="https://wa.me/573237267448" target="_blank" rel="noopener">
+        <span>WhatsApp</span>
+        <strong>323 726 7448</strong>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <span>© <span id="year"></span> FOX GAMER Entregas</span>
+    <span>Seguimiento de pedidos</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
