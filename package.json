@@ -4,8 +4,5 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "netlify dev"
-  },
-  "dependencies": {
-    "@libsql/client": "^0.15.15"
   }
 }
