@@ -1,3 +1,6 @@
+const SUPABASE_URL = "https://bsnbazyinaagjbuwqsce.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LtWTS47B0PkF2-axs5p4gw_IotLxbUJ";
+
 function escapeHtml(value = "") {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -13,7 +16,7 @@ function renderGuide(record) {
     ? events.slice().reverse().map(e => `
       <div class="timeline-item">
         <strong>${escapeHtml(e.status)}</strong>
-        <small>${escapeHtml(e.note || "")}${e.created_at ? " · " + new Date(Number(e.created_at)).toLocaleString("es-CO") : ""}</small>
+        <small>${escapeHtml(e.note || "")}${e.created_at ? " · " + new Date(e.created_at).toLocaleString("es-CO") : ""}</small>
       </div>`).join("")
     : '<div class="timeline-item"><strong>Guía registrada</strong></div>';
 
@@ -26,7 +29,7 @@ function renderGuide(record) {
         <div class="result-item"><span>Destino</span><strong>${escapeHtml(record.city || "Por confirmar")}</strong></div>
         <div class="result-item"><span>Mensajero</span><strong>${escapeHtml(record.driver || "Por asignar")}</strong></div>
         <div class="result-item"><span>Ventana de entrega</span><strong>${escapeHtml(record.delivery_window || "Por confirmar")}</strong></div>
-        <div class="result-item"><span>Última actualización</span><strong>${record.updated_at ? new Date(Number(record.updated_at)).toLocaleString("es-CO") : "Sin dato"}</strong></div>
+        <div class="result-item"><span>Última actualización</span><strong>${record.updated_at ? new Date(record.updated_at).toLocaleString("es-CO") : "Sin dato"}</strong></div>
       </div>
       <div class="timeline">${eventHtml}</div>
     </article>`;
@@ -46,9 +49,20 @@ form.addEventListener("submit", async (event) => {
   result.innerHTML = `<article class="result-card"><h3>Consultando guía…</h3></article>`;
 
   try {
-    const response = await fetch(`/api/shipments?guide=${encodeURIComponent(query)}`, { cache: "no-store" });
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/track_shipment`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
+      },
+      body: JSON.stringify({ p_guide: query }),
+      cache: "no-store"
+    });
+
+    if (!response.ok) throw new Error("No se pudo consultar la guía");
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "No encontrada");
+    if (!data) throw new Error("Guía no encontrada");
     result.innerHTML = renderGuide(data);
   } catch (error) {
     result.innerHTML = `
