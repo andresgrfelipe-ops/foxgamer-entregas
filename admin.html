@@ -20,9 +20,9 @@
     <div class="admin-title">
       <div>
         <h1>Panel de entregas</h1>
-        <p>Crea guías y actualiza el estado de los pedidos.</p>
+        <p>Crea guías, asigna mensajeros y actualiza estados.</p>
       </div>
-      <button id="export-btn" class="secondary-btn">Exportar respaldo</button>
+      <button id="login-btn" class="secondary-btn">Configurar acceso</button>
     </div>
 
     <div class="dashboard-grid">
@@ -47,20 +47,36 @@
               </select>
             </div>
             <div class="field">
-              <label for="customer">Cliente</label>
-              <input id="customer" name="customer" placeholder="Nombre del cliente" />
+              <label for="customer_name">Cliente</label>
+              <input id="customer_name" name="customer_name" required />
             </div>
             <div class="field">
-              <label for="city">Ciudad / destino</label>
-              <input id="city" name="city" placeholder="Ciudad, departamento" />
+              <label for="customer_phone">Teléfono</label>
+              <input id="customer_phone" name="customer_phone" required />
             </div>
             <div class="field full">
-              <label for="item">Artículo / pedido</label>
-              <input id="item" name="item" placeholder="Ej. PlayStation 5 Pro" />
+              <label for="product">Artículo / pedido</label>
+              <input id="product" name="product" required />
+            </div>
+            <div class="field full">
+              <label for="address">Dirección</label>
+              <input id="address" name="address" required />
+            </div>
+            <div class="field">
+              <label for="city">Ciudad</label>
+              <input id="city" name="city" required />
+            </div>
+            <div class="field">
+              <label for="driver">Mensajero</label>
+              <input id="driver" name="driver" />
+            </div>
+            <div class="field full">
+              <label for="delivery_window">Ventana de entrega</label>
+              <input id="delivery_window" name="delivery_window" placeholder="Ej. Hoy 2:00 p. m. – 6:00 p. m." />
             </div>
             <div class="field full">
               <label for="note">Nota inicial</label>
-              <textarea id="note" name="note" placeholder="Información adicional"></textarea>
+              <textarea id="note" name="note"></textarea>
             </div>
           </div>
           <div class="actions">
