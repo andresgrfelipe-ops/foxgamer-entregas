@@ -1,33 +1,3 @@
-const STORAGE_KEY = "foxgamer_entregas_guides_v1";
-
-const seedGuides = [
-  {
-    guide: "FG-2026-052756",
-    customer: "Cliente FOX GAMER",
-    city: "Cubarral, Meta",
-    item: "PlayStation 5 Pro",
-    status: "Guía creada",
-    carrier: "FOX GAMER Entregas",
-    updatedAt: "2026-09-27T12:00:00",
-    events: [
-      { label: "Guía creada", date: "27/09/2026 12:00" }
-    ]
-  }
-];
-
-function loadGuides() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seedGuides));
-      return seedGuides;
-    }
-    return JSON.parse(raw);
-  } catch {
-    return seedGuides;
-  }
-}
-
 function escapeHtml(value = "") {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -42,8 +12,8 @@ function renderGuide(record) {
   const eventHtml = events.length
     ? events.slice().reverse().map(e => `
       <div class="timeline-item">
-        <strong>${escapeHtml(e.label)}</strong>
-        <small>${escapeHtml(e.date || "")}</small>
+        <strong>${escapeHtml(e.status)}</strong>
+        <small>${escapeHtml(e.note || "")}${e.created_at ? " · " + new Date(Number(e.created_at)).toLocaleString("es-CO") : ""}</small>
       </div>`).join("")
     : '<div class="timeline-item"><strong>Guía registrada</strong></div>';
 
@@ -52,10 +22,11 @@ function renderGuide(record) {
       <span class="status-badge">${escapeHtml(record.status || "En proceso")}</span>
       <h3>${escapeHtml(record.guide)}</h3>
       <div class="result-grid">
-        <div class="result-item"><span>Pedido</span><strong>${escapeHtml(record.item || "Pedido FOX GAMER")}</strong></div>
+        <div class="result-item"><span>Pedido</span><strong>${escapeHtml(record.product || "Pedido FOX GAMER")}</strong></div>
         <div class="result-item"><span>Destino</span><strong>${escapeHtml(record.city || "Por confirmar")}</strong></div>
-        <div class="result-item"><span>Transportadora</span><strong>${escapeHtml(record.carrier || "FOX GAMER Entregas")}</strong></div>
-        <div class="result-item"><span>Última actualización</span><strong>${new Date(record.updatedAt || Date.now()).toLocaleString("es-CO")}</strong></div>
+        <div class="result-item"><span>Mensajero</span><strong>${escapeHtml(record.driver || "Por asignar")}</strong></div>
+        <div class="result-item"><span>Ventana de entrega</span><strong>${escapeHtml(record.delivery_window || "Por confirmar")}</strong></div>
+        <div class="result-item"><span>Última actualización</span><strong>${record.updated_at ? new Date(Number(record.updated_at)).toLocaleString("es-CO") : "Sin dato"}</strong></div>
       </div>
       <div class="timeline">${eventHtml}</div>
     </article>`;
@@ -67,13 +38,19 @@ const form = document.getElementById("tracking-form");
 const input = document.getElementById("guide");
 const result = document.getElementById("tracking-result");
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const query = input.value.trim().toUpperCase();
-  const guides = loadGuides();
-  const record = guides.find(g => String(g.guide || "").toUpperCase() === query);
+  if (!query) return;
 
-  if (!record) {
+  result.innerHTML = `<article class="result-card"><h3>Consultando guía…</h3></article>`;
+
+  try {
+    const response = await fetch(`/api/shipments?guide=${encodeURIComponent(query)}`, { cache: "no-store" });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "No encontrada");
+    result.innerHTML = renderGuide(data);
+  } catch (error) {
     result.innerHTML = `
       <article class="result-card">
         <h3>No encontramos esa guía</h3>
@@ -81,8 +58,5 @@ form.addEventListener("submit", (event) => {
           Verifica el número ingresado o comunícate con FOX GAMER por WhatsApp.
         </p>
       </article>`;
-    return;
   }
-
-  result.innerHTML = renderGuide(record);
 });
