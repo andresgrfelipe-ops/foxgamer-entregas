@@ -1,13 +1,25 @@
 # FOX GAMER Entregas
 
-Código base reconstruido para la plataforma de seguimiento y administración de entregas de FOX GAMER.
+Plataforma de seguimiento y administración de entregas de FOX GAMER.
 
-## Estructura
-- `index.html`: seguimiento público de guías.
-- `admin.html`: panel administrativo local.
-- `styles.css`: estilos de la interfaz.
-- `app.js`: lógica del seguimiento.
-- `admin.js`: creación y gestión de guías.
-- `netlify.toml`: configuración de despliegue estático.
+## Estado actual
+- Seguimiento público conectado a Supabase mediante la función segura `track_shipment`.
+- Panel administrativo conectado a una Netlify Function.
+- Base de datos real con `shipments`, `shipment_events` y `messages`.
+- RLS habilitado y lectura pública directa de las tablas bloqueada.
+- La consulta pública solo devuelve campos seguros del envío.
 
-> Nota: esta primera reconstrucción usa almacenamiento local del navegador para permitir probar el flujo completo sin depender todavía de un backend. El siguiente paso recomendado es conectar la persistencia compartida a Supabase.
+## Variables de entorno necesarias en Netlify
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_TOKEN`
+
+Nunca publiques `SUPABASE_SERVICE_ROLE_KEY` en el frontend ni en GitHub.
+
+## Rutas
+- `/`: consulta pública de guía.
+- `/admin`: panel administrativo.
+- `/api/shipments`: API administrativa protegida.
+
+## Despliegue
+El proyecto está preparado para Netlify mediante `netlify.toml`.
