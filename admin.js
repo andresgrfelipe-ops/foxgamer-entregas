@@ -1,4 +1,12 @@
 const TOKEN_KEY = "foxgamer_admin_token";
+const COLOMBIA_TIME_ZONE = "America/Bogota";
+
+function colombiaYear() {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: COLOMBIA_TIME_ZONE,
+    year: "numeric"
+  }).format(new Date());
+}
 
 function token() {
   return localStorage.getItem(TOKEN_KEY) || "";
@@ -72,7 +80,7 @@ document.getElementById("login-btn").addEventListener("click", () => {
 });
 
 document.getElementById("generate-btn").addEventListener("click", () => {
-  const y = new Date().getFullYear();
+  const y = colombiaYear();
   const n = Math.floor(100000 + Math.random() * 900000);
   document.getElementById("guide").value = `FG-${y}-${n}`;
 });
