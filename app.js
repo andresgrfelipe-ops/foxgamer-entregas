@@ -1,5 +1,22 @@
 const SUPABASE_URL = "https://bsnbazyinaagjbuwqsce.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LtWTS47B0PkF2-axs5p4gw_IotLxbUJ";
+const COLOMBIA_TIME_ZONE = "America/Bogota";
+
+function formatColombiaDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-CO", {
+    timeZone: COLOMBIA_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  }).format(date);
+}
 
 function escapeHtml(value = "") {
   return String(value)
@@ -16,7 +33,7 @@ function renderGuide(record) {
     ? events.slice().reverse().map(e => `
       <div class="timeline-item">
         <strong>${escapeHtml(e.status)}</strong>
-        <small>${escapeHtml(e.note || "")}${e.created_at ? " · " + new Date(e.created_at).toLocaleString("es-CO") : ""}</small>
+        <small>${escapeHtml(e.note || "")}${e.created_at ? " · " + formatColombiaDateTime(e.created_at) : ""}</small>
       </div>`).join("")
     : '<div class="timeline-item"><strong>Guía registrada</strong></div>';
 
@@ -29,7 +46,7 @@ function renderGuide(record) {
         <div class="result-item"><span>Destino</span><strong>${escapeHtml(record.city || "Por confirmar")}</strong></div>
         <div class="result-item"><span>Mensajero</span><strong>${escapeHtml(record.driver || "Por asignar")}</strong></div>
         <div class="result-item"><span>Ventana de entrega</span><strong>${escapeHtml(record.delivery_window || "Por confirmar")}</strong></div>
-        <div class="result-item"><span>Última actualización</span><strong>${record.updated_at ? new Date(record.updated_at).toLocaleString("es-CO") : "Sin dato"}</strong></div>
+        <div class="result-item"><span>Última actualización</span><strong>${record.updated_at ? formatColombiaDateTime(record.updated_at) : "Sin dato"}</strong></div>
       </div>
       <div class="timeline">${eventHtml}</div>
     </article>`;
