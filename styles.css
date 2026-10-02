@@ -300,3 +300,44 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:24px clamp(24
   .guide-document-wrap{padding:0!important}
   .guide-document{box-shadow:none!important;border-radius:0!important;max-width:none!important;padding:18mm!important}
 }
+
+/* Acceso administrativo con usuario y contraseña */
+.admin-login-gate{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  place-items:center;
+  padding:24px;
+  background:
+    radial-gradient(circle at top right, rgba(255,106,42,.18), transparent 32%),
+    #0d1120;
+}
+.admin-login-gate.show{display:grid}
+.admin-locked{overflow:hidden}
+.admin-login-card{
+  width:min(440px,100%);
+  background:#fff;
+  border-radius:30px;
+  padding:32px;
+  box-shadow:0 30px 90px rgba(0,0,0,.32);
+}
+.admin-login-brand{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.admin-login-brand .brand-mark{width:58px;height:58px;font-size:30px;border-radius:18px}
+.admin-login-brand strong{display:block;font-size:20px;letter-spacing:.09em}
+.admin-login-brand small{display:block;margin-top:6px;color:#ff6a2a;font-size:10px;font-weight:900;letter-spacing:.17em}
+.admin-login-card h1{font-size:34px;line-height:1.05;margin:0 0 10px;font-weight:800;letter-spacing:-.035em}
+.admin-login-card>p{margin:0 0 24px;color:#7a8498;line-height:1.5}
+.admin-login-card form{display:flex;flex-direction:column;gap:16px}
+.admin-login-card label{display:flex;flex-direction:column;gap:7px}
+.admin-login-card label span{font-size:13px;font-weight:800;color:#596479}
+.admin-login-card input{border:1px solid #dfe3ea;border-radius:16px;padding:15px 16px;outline:none;background:#fff}
+.admin-login-card input:focus{border-color:#ff986c;box-shadow:0 0 0 3px rgba(255,106,42,.10)}
+.admin-login-submit{width:100%;margin-top:4px}
+.admin-login-error{min-height:20px;color:#b63b3b;font-size:13px;font-weight:700;text-align:center}
+.admin-login-back{display:block;text-align:center;margin-top:18px;color:#687286;font-size:13px;font-weight:700}
+@media(max-width:560px){
+  .admin-login-gate{padding:16px}
+  .admin-login-card{padding:24px;border-radius:24px}
+  .admin-login-card h1{font-size:30px}
+}
