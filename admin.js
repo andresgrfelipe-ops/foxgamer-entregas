@@ -2,6 +2,7 @@ const TOKEN_KEY = "foxgamer_admin_token";
 const COLOMBIA_TIME_ZONE = "America/Bogota";
 let allShipments = [];
 let activeFilter = "all";
+let searchQuery = "";
 
 function colombiaYear() {
   return new Intl.DateTimeFormat("en-US", {
@@ -92,8 +93,22 @@ function statusClass(status) {
 }
 
 function filteredShipments() {
-  if (activeFilter === "all") return allShipments;
-  return allShipments.filter(g => shipmentGroup(g.status) === activeFilter);
+  const byStatus = activeFilter === "all"
+    ? allShipments
+    : allShipments.filter(g => shipmentGroup(g.status) === activeFilter);
+
+  const q = searchQuery.trim().toLowerCase();
+  if (!q) return byStatus;
+  return byStatus.filter(g => [
+    g.guide,
+    g.customer_name,
+    g.customer_phone,
+    g.product,
+    g.address,
+    g.city,
+    g.driver,
+    g.status
+  ].some(value => String(value || "").toLowerCase().includes(q)));
 }
 
 function renderList() {
@@ -116,6 +131,7 @@ function renderList() {
         <p class="guide-location">${g.city || "Ciudad por confirmar"}${g.driver ? " · Mensajero: " + g.driver : ""}</p>
       </div>
       <div class="row-actions">
+        <a class="guide-view-btn" href="/admin/documento/${encodeURIComponent(g.guide)}" title="Abrir guía">Ver guía</a>
         <button class="icon-btn" data-action="advance" data-id="${g.id}" data-status="${g.status}" title="Avanzar estado">↻</button>
         <button class="icon-btn" data-action="copy" data-guide="${g.guide}" title="Copiar guía">⧉</button>
         <button class="icon-btn danger-icon" data-action="delete" data-id="${g.id}" title="Eliminar">⌫</button>
@@ -163,6 +179,11 @@ document.getElementById("config-access-btn").addEventListener("click", configure
 document.getElementById("new-guide-btn").addEventListener("click", () => {
   document.getElementById("new-guide-panel").scrollIntoView({ behavior: "smooth", block: "start" });
   document.getElementById("customer_name").focus({ preventScroll: true });
+});
+
+document.getElementById("guide-search").addEventListener("input", (event) => {
+  searchQuery = event.target.value || "";
+  renderList();
 });
 
 document.querySelectorAll(".filter-chip").forEach(button => {

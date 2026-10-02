@@ -19,3 +19,8 @@
   from = "/admin"
   to = "/admin.html"
   status = 200
+
+[[redirects]]
+  from = "/admin/documento/*"
+  to = "/guide.html"
+  status = 200

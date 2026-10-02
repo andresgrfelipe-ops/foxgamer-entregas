@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0d1120" />
   <title>Administración | FOX GAMER Entregas</title>
-  <link rel="stylesheet" href="/styles.css?v=20261002-0550" />
+  <link rel="stylesheet" href="/styles.css?v=20261002-0615" />
 </head>
 <body class="admin-shell admin-shell-pro">
   <header class="admin-header admin-header-pro">
@@ -68,11 +68,17 @@
           <h2>Gestión de envíos</h2>
           <p class="panel-subtitle">Filtra rápidamente las guías por estado.</p>
         </div>
-        <div class="shipment-filters" role="group" aria-label="Filtros de guías">
+        <div class="guide-tools">
+          <label class="guide-search" for="guide-search">
+            <span>Buscar guía</span>
+            <input id="guide-search" type="search" placeholder="Número, cliente, producto o ciudad" autocomplete="off" />
+          </label>
+          <div class="shipment-filters" role="group" aria-label="Filtros de guías">
           <button class="filter-chip active" data-filter="all" type="button">Todos</button>
           <button class="filter-chip" data-filter="pending" type="button">Pendientes</button>
           <button class="filter-chip" data-filter="route" type="button">En ruta</button>
           <button class="filter-chip" data-filter="delivered" type="button">Entregados</button>
+          </div>
         </div>
       </section>
 
@@ -170,6 +176,6 @@
   </div>
 
   <div id="toast" class="toast"></div>
-  <script src="/admin.js?v=20261002-0550"></script>
+  <script src="/admin.js?v=20261002-0615"></script>
 </body>
 </html>
