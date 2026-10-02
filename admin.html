@@ -19,14 +19,24 @@
   <main class="admin-main">
     <div class="admin-title">
       <div>
-        <h1>Panel de entregas</h1>
-        <p>Crea guías, asigna mensajeros y actualiza estados.</p>
+        <h1>Centro de entregas</h1>
+        <p>Controla cada pedido desde la tienda hasta el cliente.</p>
       </div>
-      <button id="login-btn" class="secondary-btn">Configurar acceso</button>
+      <div class="admin-title-actions">
+        <button id="new-guide-btn" class="primary-btn" type="button">＋ Nueva guía</button>
+        <button id="login-btn" class="secondary-btn">Configurar acceso</button>
+      </div>
     </div>
 
+    <section class="stats-grid" aria-label="Resumen de entregas">
+      <article class="stat-card"><span>Envíos registrados</span><strong id="stat-total">—</strong><small>Base de datos activa</small></article>
+      <article class="stat-card"><span>En ruta</span><strong id="stat-route">—</strong><small>Seguimiento activo</small></article>
+      <article class="stat-card"><span>Entregados</span><strong id="stat-delivered">—</strong><small>Confirmados</small></article>
+      <article class="stat-card"><span>Pendientes</span><strong id="stat-pending">—</strong><small>Requieren gestión</small></article>
+    </section>
+
     <div class="dashboard-grid">
-      <section class="panel">
+      <section class="panel" id="new-guide-panel">
         <h2>Nueva guía</h2>
         <form id="guide-form">
           <div class="form-grid">
@@ -86,8 +96,9 @@
         </form>
       </section>
 
-      <section class="panel">
-        <h2>Guías registradas</h2>
+      <section class="panel recent-panel">
+        <h2>Envíos recientes</h2>
+        <p class="panel-subtitle">Guías generadas por FOX GAMER · Horario Colombia</p>
         <div id="guide-list" class="guide-list"></div>
       </section>
     </div>
