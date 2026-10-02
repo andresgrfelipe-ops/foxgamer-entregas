@@ -1,3 +1,5 @@
+const SUPABASE_URL = "https://bsnbazyinaagjbuwqsce.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LtWTS47B0PkF2-axs5p4gw_IotLxbUJ";
 const TOKEN_KEY = "foxgamer_admin_token";
 const COLOMBIA_TIME_ZONE = "America/Bogota";
 let allShipments = [];
@@ -68,14 +70,33 @@ function headers() {
 }
 
 async function api(method = "GET", body) {
-  const response = await fetch("/api/shipments", {
-    method,
-    headers: headers(),
-    body: body ? JSON.stringify(body) : undefined,
+  const action = method === "GET" ? "list" :
+    method === "POST" ? "create" :
+    method === "PATCH" ? "patch" :
+    method === "DELETE" ? "delete" : "list";
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/admin_shipments`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
+    },
+    body: JSON.stringify({
+      p_token: token(),
+      p_action: action,
+      p_payload: body || {}
+    }),
     cache: "no-store"
   });
+
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || "Error");
+  if (!response.ok) {
+    const message = data?.message === "not_authorized"
+      ? "El token no coincide con el acceso administrador"
+      : (data?.message || data?.error || "Error al conectar con la base de datos");
+    throw new Error(message);
+  }
   return data;
 }
 
