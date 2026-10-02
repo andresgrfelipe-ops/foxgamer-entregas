@@ -8,6 +8,31 @@ function colombiaYear() {
   }).format(new Date());
 }
 
+function formatColombiaDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-CO", {
+    timeZone: COLOMBIA_TIME_ZONE,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  }).format(date);
+}
+
+function updateStats(shipments) {
+  const delivered = shipments.filter(g => g.status === "Entregado").length;
+  const routeStatuses = new Set(["Recogido","En centro logístico","En tránsito","En reparto"]);
+  const inRoute = shipments.filter(g => routeStatuses.has(g.status)).length;
+  document.getElementById("stat-total").textContent = shipments.length;
+  document.getElementById("stat-route").textContent = inRoute;
+  document.getElementById("stat-delivered").textContent = delivered;
+  document.getElementById("stat-pending").textContent = Math.max(0, shipments.length - delivered);
+}
+
 function token() {
   return localStorage.getItem(TOKEN_KEY) || "";
 }
@@ -43,6 +68,7 @@ async function render() {
   try {
     const data = await api();
     const shipments = data.shipments || [];
+    updateStats(shipments);
     if (!shipments.length) {
       list.innerHTML = '<div class="empty">No hay guías registradas todavía.</div>';
       return;
@@ -51,7 +77,8 @@ async function render() {
       <article class="guide-row">
         <div>
           <h3>${g.guide}</h3>
-          <p>${g.product} · ${g.city}</p>
+          <p class="guide-date">${formatColombiaDateTime(g.created_at || g.updated_at)}</p>
+          <p>${g.customer_name || "Cliente"} · ${g.product} · ${g.city}</p>
           <p><strong>${g.status}</strong>${g.driver ? " · " + g.driver : ""}</p>
         </div>
         <div class="row-actions">
@@ -77,6 +104,11 @@ document.getElementById("login-btn").addEventListener("click", () => {
   if (value === null) return;
   localStorage.setItem(TOKEN_KEY, value.trim());
   render();
+});
+
+document.getElementById("new-guide-btn").addEventListener("click", () => {
+  document.getElementById("new-guide-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("customer_name").focus({ preventScroll: true });
 });
 
 document.getElementById("generate-btn").addEventListener("click", () => {
