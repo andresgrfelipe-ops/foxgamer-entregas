@@ -5,6 +5,7 @@ const COLOMBIA_TIME_ZONE = "America/Bogota";
 let allShipments = [];
 let activeFilter = "all";
 let searchQuery = "";
+let recoveryAttempted = false;
 
 function colombiaYear() {
   return new Intl.DateTimeFormat("en-US", {
@@ -160,11 +161,38 @@ function renderList() {
     </article>`).join("");
 }
 
+async function recoverLegacyGuides() {
+  if (recoveryAttempted) return false;
+  recoveryAttempted = true;
+  try {
+    notify("Buscando guías antiguas…");
+    const response = await fetch("/api/shipments?recover=legacy", {
+      method: "POST",
+      headers: headers(),
+      cache: "no-store"
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || data.reason || "No se pudieron recuperar");
+    notify(`Recuperadas ${data.shipments_imported ?? data.found ?? 0} guías`);
+    return true;
+  } catch (error) {
+    notify(error.message);
+    return false;
+  }
+}
+
 async function render() {
   const list = document.getElementById("guide-list");
   try {
     const data = await api();
     allShipments = data.shipments || [];
+    if (!allShipments.length && !recoveryAttempted) {
+      const recovered = await recoverLegacyGuides();
+      if (recovered) {
+        const refreshed = await api();
+        allShipments = refreshed.shipments || [];
+      }
+    }
     updateStats(allShipments);
     renderList();
   } catch (error) {
