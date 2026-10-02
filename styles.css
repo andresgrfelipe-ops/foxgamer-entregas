@@ -204,3 +204,40 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:24px clamp(24
   .guide-row .row-actions{justify-content:flex-end}
   .guide-topline{align-items:flex-start}
 }
+
+.mobile-admin-nav{display:none}
+@media(max-width:1100px){
+  .mobile-admin-nav{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+    margin:0 0 20px;
+    padding:9px;
+    background:#111725;
+    border-radius:18px;
+    overflow-x:auto;
+  }
+  .mobile-nav-item{
+    text-align:center;
+    color:#aeb6c7;
+    font-size:12px;
+    font-weight:800;
+    padding:11px 8px;
+    border-radius:12px;
+    white-space:nowrap;
+  }
+  .mobile-nav-item.active{background:#ff6a2a;color:#fff}
+}
+@media(max-width:560px){
+  .admin-header-pro .brand-mark{width:44px;height:44px;font-size:24px}
+  .admin-header-pro .brand-copy strong{font-size:16px}
+  .admin-header-pro .brand-copy small{font-size:9px}
+  .admin-title{background:#111725;color:#fff;padding:20px;border-radius:22px;margin-bottom:16px}
+  .admin-title h1{color:#fff;font-size:30px}
+  .admin-title p{color:#aeb6c7}
+  .admin-kicker{color:#ff8a50}
+  .admin-title-actions{display:grid;grid-template-columns:1fr 1fr}
+  .admin-title-actions .primary-btn,.admin-title-actions .secondary-btn{width:100%;padding:14px 10px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat-card{min-height:142px}
+}
