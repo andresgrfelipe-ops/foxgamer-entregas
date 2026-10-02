@@ -260,9 +260,12 @@ document.getElementById("logout-secondary-btn").addEventListener("click", logout
 
 document.getElementById("recover-guides-btn").addEventListener("click", async () => {
   const button = document.getElementById("recover-guides-btn");
+  const status = document.getElementById("recovery-status");
   const original = button.textContent;
   button.disabled = true;
   button.textContent = "Recuperando…";
+  status.className = "recovery-status working";
+  status.textContent = "Buscando la base histórica y preparando la importación…";
   try {
     const response = await fetch("/api/shipments?recover=legacy", {
       method: "POST",
@@ -271,9 +274,14 @@ document.getElementById("recover-guides-btn").addEventListener("click", async ()
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || data.reason || "No se pudieron recuperar las guías");
-    notify(`Recuperación completada: ${data.shipments_imported ?? data.found ?? 0} guías`);
+    const amount = data.shipments_imported ?? data.found ?? 0;
+    status.className = "recovery-status success";
+    status.textContent = `Recuperación completada: ${amount} guías recuperadas.`;
+    notify(`Recuperadas ${amount} guías`);
     await render();
   } catch (error) {
+    status.className = "recovery-status error";
+    status.textContent = "No se pudo completar la recuperación: " + String(error.message || error);
     notify(error.message);
   } finally {
     button.disabled = false;
