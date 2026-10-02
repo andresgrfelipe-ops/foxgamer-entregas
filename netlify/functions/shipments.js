@@ -144,12 +144,37 @@ exports.handler = async (event) => {
       let recovery = { recovered: 0, source: "supabase" };
       try {
         recovery = await recoverLegacyIfNeeded();
-      } catch (recoveryError) {
-        console.error("Legacy recovery skipped:", recoveryError);
+        const rows = await sb("shipments?select=id,guide,customer_name,customer_phone,product,address,city,driver,status,delivery_window,created_at,updated_at&order=updated_at.desc&limit=200");
+        return json(200, { shipments: rows || [], recovery });
+      } catch (primaryError) {
+        console.error("Supabase read failed, trying legacy LibSQL:", primaryError);
+        try {
+          const client = legacyDb();
+          if (!client) throw primaryError;
+          const rs = await client.execute(
+            `SELECT id, guide, customer_name, customer_phone, product, address, city, driver,
+                    status, delivery_window, created_at, updated_at
+             FROM shipments ORDER BY updated_at DESC LIMIT 200`
+          );
+          const shipments = (rs.rows || []).map(row => ({
+            ...row,
+            id: String(row.id),
+            created_at: toIso(row.created_at) || row.created_at,
+            updated_at: toIso(row.updated_at) || row.updated_at
+          }));
+          return json(200, { shipments, recovery: { recovered: 0, source: "legacy-fallback" } });
+        } catch (legacyError) {
+          console.error("Legacy fallback failed:", legacyError);
+          const primary = String(primaryError?.message || primaryError || "");
+          const legacy = String(legacyError?.message || legacyError || "");
+          const diagnostic =
+            /SUPABASE_SERVICE_ROLE_KEY/i.test(primary) ? "Falta configurar SUPABASE_SERVICE_ROLE_KEY en Production" :
+            /jwt|apikey|unauthorized|401/i.test(primary) ? "La clave de Supabase configurada en Production no es válida" :
+            /LIBSQL_URL/i.test(legacy) ? "La base antigua no está configurada en Production" :
+            "No se pudo conectar con la base de datos actual ni con la base histórica";
+          return json(500, { error: diagnostic });
+        }
       }
-
-      const rows = await sb("shipments?select=id,guide,customer_name,customer_phone,product,address,city,driver,status,delivery_window,created_at,updated_at&order=updated_at.desc&limit=200");
-      return json(200, { shipments: rows || [], recovery });
     }
 
     const body = event.body ? JSON.parse(event.body) : {};
