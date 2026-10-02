@@ -341,3 +341,10 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:24px clamp(24
   .admin-login-card{padding:24px;border-radius:24px}
   .admin-login-card h1{font-size:30px}
 }
+
+
+.recovery-status{display:block;width:100%;margin-top:10px;padding:0;font-size:13px;line-height:1.45}
+.recovery-status:empty{display:none}
+.recovery-status.working{color:#6f7788}
+.recovery-status.success{color:#238451;background:#eaf8f0;border:1px solid #cfeedd;border-radius:12px;padding:10px 12px}
+.recovery-status.error{color:#a93535;background:#fff1f1;border:1px solid #f2cccc;border-radius:12px;padding:10px 12px}
