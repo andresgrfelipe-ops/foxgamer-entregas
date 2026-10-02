@@ -241,3 +241,62 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:24px clamp(24
   .stats-grid{grid-template-columns:1fr 1fr}
   .stat-card{min-height:142px}
 }
+
+
+/* Herramientas y documento profesional de guías */
+.guide-tools{display:flex;align-items:end;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.guide-search{display:flex;flex-direction:column;gap:6px;min-width:min(320px,100%)}
+.guide-search span{font-size:11px;font-weight:800;color:#7a8498;text-transform:uppercase;letter-spacing:.08em}
+.guide-search input{border:1px solid #dfe3ea;border-radius:14px;padding:11px 13px;outline:none;background:#fff;min-width:260px}
+.guide-search input:focus{border-color:#ff986c;box-shadow:0 0 0 3px rgba(255,106,42,.10)}
+.guide-view-btn{border:1px solid #ffd3be;background:#fff4ee;color:#d85b20;font-size:12px;font-weight:900;border-radius:12px;padding:9px 11px;white-space:nowrap}
+.guide-view-btn:hover{background:#ffe9dc}
+
+.guide-document-shell{background:#eef1f5;min-height:100vh}
+.guide-doc-topbar{background:#0d1120;color:#fff;padding:18px clamp(18px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.guide-doc-topbar .brand-copy strong{color:#fff}
+.guide-doc-actions{display:flex;gap:10px;align-items:center}
+.guide-document-wrap{padding:32px 16px 60px}
+.guide-document{max-width:920px;margin:0 auto;background:#fff;border-radius:28px;box-shadow:0 22px 65px rgba(15,23,42,.13);padding:42px}
+.guide-document-loading,.guide-document-error{text-align:center;padding:70px 20px;color:#7a8498}
+.guide-document-error h2{color:#172033}
+.guide-doc-head{display:flex;justify-content:space-between;gap:30px;align-items:flex-start;padding-bottom:28px;border-bottom:2px solid #f0f2f6}
+.guide-doc-kicker{font-size:11px;font-weight:900;letter-spacing:.16em;color:#ff6a2a}
+.guide-doc-head h1{font-size:38px;line-height:1.05;letter-spacing:-.03em;margin:8px 0 8px;font-weight:800}
+.guide-doc-head p{margin:0;color:#7a8498}
+.guide-doc-number{background:#111827;color:#fff;border-radius:20px;padding:18px 20px;min-width:245px}
+.guide-doc-number span,.guide-doc-number small{display:block;color:#aeb6c7}
+.guide-doc-number strong{display:block;font-size:21px;margin:7px 0 5px}
+.guide-doc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:22px 0}
+.guide-doc-meta>div,.guide-doc-grid>div{background:#f6f7fa;border-radius:16px;padding:15px}
+.guide-doc-meta span,.guide-doc-grid span{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#8a94a7;margin-bottom:6px}
+.guide-doc-meta strong,.guide-doc-grid strong{font-size:14px;color:#20293a}
+.guide-doc-section{padding:22px 0;border-top:1px solid #eef0f4}
+.guide-doc-section h2{margin:0 0 15px;font-size:18px}
+.guide-doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.guide-doc-grid .wide{grid-column:1/-1}
+.guide-doc-footer{margin-top:26px;padding-top:24px;border-top:2px solid #111827;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.guide-doc-footer strong,.guide-doc-footer span{display:block}
+.guide-doc-footer span{margin-top:5px;color:#8a94a7;font-size:12px}
+.guide-doc-stamp{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:#ff6a2a;color:#fff;font-weight:900;font-size:20px}
+@media(max-width:700px){
+  .guide-tools{align-items:stretch;width:100%;justify-content:stretch}
+  .guide-search{width:100%}
+  .guide-search input{min-width:0;width:100%}
+  .shipment-filters{flex:1}
+  .guide-doc-topbar{align-items:flex-start}
+  .guide-doc-actions .secondary-btn{display:none}
+  .guide-doc-actions .primary-btn{padding:12px 14px;border-radius:14px;font-size:12px}
+  .guide-document{padding:22px;border-radius:20px}
+  .guide-doc-head{flex-direction:column}
+  .guide-doc-number{width:100%;min-width:0}
+  .guide-doc-meta{grid-template-columns:1fr}
+  .guide-doc-grid{grid-template-columns:1fr}
+  .guide-doc-grid .wide{grid-column:auto}
+}
+@media print{
+  body{background:#fff!important}
+  .guide-doc-topbar{display:none!important}
+  .guide-document-wrap{padding:0!important}
+  .guide-document{box-shadow:none!important;border-radius:0!important;max-width:none!important;padding:18mm!important}
+}
