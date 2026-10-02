@@ -1,5 +1,7 @@
 const TOKEN_KEY = "foxgamer_admin_token";
 const COLOMBIA_TIME_ZONE = "America/Bogota";
+let allShipments = [];
+let activeFilter = "all";
 
 function colombiaYear() {
   return new Intl.DateTimeFormat("en-US", {
@@ -21,6 +23,19 @@ function formatColombiaDateTime(value) {
     minute: "2-digit",
     hour12: true
   }).format(date);
+}
+
+function updateColombiaClock() {
+  const el = document.getElementById("colombia-clock");
+  if (!el) return;
+  el.textContent = new Intl.DateTimeFormat("es-CO", {
+    timeZone: COLOMBIA_TIME_ZONE,
+    weekday: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  }).format(new Date());
 }
 
 function updateStats(shipments) {
@@ -63,35 +78,63 @@ async function api(method = "GET", body) {
   return data;
 }
 
+function shipmentGroup(status) {
+  if (status === "Entregado") return "delivered";
+  if (["Recogido","En centro logístico","En tránsito","En reparto"].includes(status)) return "route";
+  return "pending";
+}
+
+function statusClass(status) {
+  if (status === "Entregado") return "status-delivered";
+  if (["Recogido","En centro logístico","En tránsito","En reparto"].includes(status)) return "status-route";
+  if (status === "Novedad") return "status-alert";
+  return "status-pending";
+}
+
+function filteredShipments() {
+  if (activeFilter === "all") return allShipments;
+  return allShipments.filter(g => shipmentGroup(g.status) === activeFilter);
+}
+
+function renderList() {
+  const list = document.getElementById("guide-list");
+  const shipments = filteredShipments();
+  if (!shipments.length) {
+    list.innerHTML = '<div class="empty">No hay guías para este filtro.</div>';
+    return;
+  }
+
+  list.innerHTML = shipments.map(g => `
+    <article class="guide-row guide-row-pro">
+      <div class="guide-main">
+        <div class="guide-topline">
+          <h3>${g.guide}</h3>
+          <span class="shipment-status ${statusClass(g.status)}">${g.status || "Guía creada"}</span>
+        </div>
+        <p class="guide-date">${formatColombiaDateTime(g.created_at || g.updated_at)}</p>
+        <p class="guide-customer"><strong>${g.customer_name || "Cliente"}</strong> · ${g.product || "Pedido FOX GAMER"}</p>
+        <p class="guide-location">${g.city || "Ciudad por confirmar"}${g.driver ? " · Mensajero: " + g.driver : ""}</p>
+      </div>
+      <div class="row-actions">
+        <button class="icon-btn" data-action="advance" data-id="${g.id}" data-status="${g.status}" title="Avanzar estado">↻</button>
+        <button class="icon-btn" data-action="copy" data-guide="${g.guide}" title="Copiar guía">⧉</button>
+        <button class="icon-btn danger-icon" data-action="delete" data-id="${g.id}" title="Eliminar">⌫</button>
+      </div>
+    </article>`).join("");
+}
+
 async function render() {
   const list = document.getElementById("guide-list");
   try {
     const data = await api();
-    const shipments = data.shipments || [];
-    updateStats(shipments);
-    if (!shipments.length) {
-      list.innerHTML = '<div class="empty">No hay guías registradas todavía.</div>';
-      return;
-    }
-    list.innerHTML = shipments.map(g => `
-      <article class="guide-row">
-        <div>
-          <h3>${g.guide}</h3>
-          <p class="guide-date">${formatColombiaDateTime(g.created_at || g.updated_at)}</p>
-          <p>${g.customer_name || "Cliente"} · ${g.product} · ${g.city}</p>
-          <p><strong>${g.status}</strong>${g.driver ? " · " + g.driver : ""}</p>
-        </div>
-        <div class="row-actions">
-          <button class="icon-btn" data-action="advance" data-id="${g.id}" data-status="${g.status}" title="Avanzar estado">↻</button>
-          <button class="icon-btn" data-action="copy" data-guide="${g.guide}" title="Copiar guía">⧉</button>
-          <button class="icon-btn" data-action="delete" data-id="${g.id}" title="Eliminar">⌫</button>
-        </div>
-      </article>`).join("");
+    allShipments = data.shipments || [];
+    updateStats(allShipments);
+    renderList();
   } catch (error) {
     const message = String(error?.message || "Error");
     const isAuth = /No autorizado|401/i.test(message);
     list.innerHTML = '<div class="empty">' + (isAuth
-      ? 'Acceso rechazado (401). El token guardado en este navegador no coincide con ADMIN_TOKEN de Production.'
+      ? 'Acceso rechazado (401). Configura nuevamente el acceso del panel.'
       : 'No se pudieron cargar las guías: ' + message.replace(/[<>]/g, '')) + '</div>';
     document.getElementById("stat-total").textContent = "!";
     document.getElementById("stat-route").textContent = "!";
@@ -107,16 +150,27 @@ function nextStatus(current) {
   return flow[Math.min(i + 1, flow.length - 1)];
 }
 
-document.getElementById("login-btn").addEventListener("click", () => {
+function configureAccess() {
   const value = prompt("Token de administrador:", token());
   if (value === null) return;
   localStorage.setItem(TOKEN_KEY, value.trim());
   render();
-});
+}
+
+document.getElementById("login-btn").addEventListener("click", configureAccess);
+document.getElementById("config-access-btn").addEventListener("click", configureAccess);
 
 document.getElementById("new-guide-btn").addEventListener("click", () => {
   document.getElementById("new-guide-panel").scrollIntoView({ behavior: "smooth", block: "start" });
   document.getElementById("customer_name").focus({ preventScroll: true });
+});
+
+document.querySelectorAll(".filter-chip").forEach(button => {
+  button.addEventListener("click", () => {
+    activeFilter = button.dataset.filter;
+    document.querySelectorAll(".filter-chip").forEach(item => item.classList.toggle("active", item === button));
+    renderList();
+  });
 });
 
 document.getElementById("generate-btn").addEventListener("click", () => {
@@ -169,4 +223,6 @@ document.getElementById("guide-list").addEventListener("click", async (event) =>
   }
 });
 
+updateColombiaClock();
+setInterval(updateColombiaClock, 1000);
 render();
