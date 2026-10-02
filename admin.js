@@ -305,7 +305,7 @@ document.getElementById("generate-btn").addEventListener("click", () => {
 
 document.getElementById("guide-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const values = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;\n  const values = Object.fromEntries(new FormData(form).entries());
   values.guide = String(values.guide || "").trim().toUpperCase();
   values.responsible = "Administración FOX GAMER";
 
