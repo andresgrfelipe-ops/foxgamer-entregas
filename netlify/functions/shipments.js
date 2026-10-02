@@ -100,9 +100,17 @@ async function recoverLegacyIfNeeded() {
 }
 
 
-function isAdmin(event) {
+function adminAuthStatus(event) {
   const expected = process.env.ADMIN_TOKEN;
-  return Boolean(expected) && event.headers["x-admin-token"] === expected;
+  const received = event.headers["x-admin-token"] || "";
+  if (!expected) return { ok: false, reason: "ADMIN_TOKEN no está configurado en Production" };
+  if (!received) return { ok: false, reason: "El navegador no está enviando el token" };
+  if (received !== expected) return { ok: false, reason: "El token no coincide con ADMIN_TOKEN de Production" };
+  return { ok: true };
+}
+
+function isAdmin(event) {
+  return adminAuthStatus(event).ok;
 }
 
 async function sb(path, options = {}) {
@@ -129,7 +137,8 @@ async function sb(path, options = {}) {
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return json(204, {});
   try {
-    if (!isAdmin(event)) return json(401, { error: "No autorizado" });
+    const auth = adminAuthStatus(event);
+    if (!auth.ok) return json(401, { error: auth.reason });
 
     if (event.httpMethod === "GET") {
       let recovery = { recovered: 0, source: "supabase" };
