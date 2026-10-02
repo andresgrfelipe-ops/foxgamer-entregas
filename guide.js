@@ -1,3 +1,5 @@
+const SUPABASE_URL = "https://bsnbazyinaagjbuwqsce.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LtWTS47B0PkF2-axs5p4gw_IotLxbUJ";
 const TOKEN_KEY = "foxgamer_admin_token";
 const COLOMBIA_TIME_ZONE = "America/Bogota";
 
@@ -93,12 +95,27 @@ async function loadGuide() {
     return;
   }
   try {
-    const response = await fetch("/api/shipments", {
-      headers: {"x-admin-token": token()},
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/admin_shipments`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
+      },
+      body: JSON.stringify({
+        p_token: token(),
+        p_action: "list",
+        p_payload: {}
+      }),
       cache: "no-store"
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "No se pudo cargar");
+    if (!response.ok) {
+      const message = data?.message === "not_authorized"
+        ? "El token no coincide con el acceso administrador"
+        : (data?.message || "No se pudo cargar la guía");
+      throw new Error(message);
+    }
     const code = guideFromPath();
     const shipment = (data.shipments || []).find(item => String(item.guide || "").toUpperCase() === code);
     if (!shipment) throw new Error("Guía no encontrada");
