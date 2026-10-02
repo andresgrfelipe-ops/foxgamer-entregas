@@ -258,6 +258,29 @@ function logout() {
 document.getElementById("logout-btn").addEventListener("click", logout);
 document.getElementById("logout-secondary-btn").addEventListener("click", logout);
 
+document.getElementById("recover-guides-btn").addEventListener("click", async () => {
+  const button = document.getElementById("recover-guides-btn");
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = "Recuperando…";
+  try {
+    const response = await fetch("/api/shipments?recover=legacy", {
+      method: "POST",
+      headers: headers(),
+      cache: "no-store"
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || data.reason || "No se pudieron recuperar las guías");
+    notify(`Recuperación completada: ${data.shipments_imported ?? data.found ?? 0} guías`);
+    await render();
+  } catch (error) {
+    notify(error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = original;
+  }
+});
+
 document.getElementById("admin-login-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const username = document.getElementById("admin-username").value.trim().toLowerCase();
