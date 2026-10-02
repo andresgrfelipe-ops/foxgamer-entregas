@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0d1120" />
   <title>Administración | FOX GAMER Entregas</title>
-  <link rel="stylesheet" href="/styles.css?v=20261002-0638" />
+  <link rel="stylesheet" href="/styles.css?v=20261002-0705" />
 </head>
 <body class="admin-shell admin-shell-pro">
   <header class="admin-header admin-header-pro">
@@ -52,7 +52,7 @@
         </div>
         <div class="admin-title-actions">
           <button id="new-guide-btn" class="primary-btn" type="button">＋ Nueva guía</button>
-          <button id="login-btn" class="secondary-btn">Configurar acceso</button>
+          <button id="logout-btn" class="secondary-btn" type="button">Cerrar sesión</button>
         </div>
       </div>
 
@@ -169,13 +169,40 @@
         <article class="panel" id="configuracion">
           <h2>Configuración</h2>
           <p class="panel-subtitle">El panel muestra fechas y horas usando America/Bogota.</p>
-          <button id="config-access-btn" class="secondary-btn inline-btn" type="button">Configurar acceso</button>
+          <button id="logout-secondary-btn" class="secondary-btn inline-btn" type="button">Cerrar sesión</button>
         </article>
       </section>
     </main>
   </div>
 
   <div id="toast" class="toast"></div>
-  <script src="/admin.js?v=20261002-0638"></script>
+  
+  <div id="admin-login-gate" class="admin-login-gate" aria-hidden="true">
+    <div class="admin-login-card">
+      <div class="admin-login-brand">
+        <span class="brand-mark">🦊</span>
+        <div>
+          <strong>FOX GAMER</strong>
+          <small>ACCESO ADMINISTRATIVO</small>
+        </div>
+      </div>
+      <h1>Iniciar sesión</h1>
+      <p>Ingresa tus credenciales para acceder al panel de entregas.</p>
+      <form id="admin-login-form">
+        <label>
+          <span>Usuario</span>
+          <input id="admin-username" name="username" type="text" autocomplete="username" placeholder="Usuario" required />
+        </label>
+        <label>
+          <span>Contraseña</span>
+          <input id="admin-password" name="password" type="password" autocomplete="current-password" placeholder="Contraseña" required />
+        </label>
+        <button class="primary-btn admin-login-submit" type="submit">Entrar al panel</button>
+        <div id="admin-login-error" class="admin-login-error" role="alert"></div>
+      </form>
+      <a class="admin-login-back" href="/">← Volver al seguimiento</a>
+    </div>
+  </div>
+  <script src="/admin.js?v=20261002-0705"></script>
 </body>
 </html>
