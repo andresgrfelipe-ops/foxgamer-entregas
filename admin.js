@@ -1,6 +1,7 @@
 const SUPABASE_URL = "https://bsnbazyinaagjbuwqsce.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LtWTS47B0PkF2-axs5p4gw_IotLxbUJ";
 const TOKEN_KEY = "foxgamer_admin_token";
+const ADMIN_USERNAME = "foxgamer";
 const COLOMBIA_TIME_ZONE = "America/Bogota";
 let allShipments = [];
 let activeFilter = "all";
@@ -215,15 +216,68 @@ function nextStatus(current) {
   return flow[Math.min(i + 1, flow.length - 1)];
 }
 
-function configureAccess() {
-  const value = prompt("Token de administrador:", token());
-  if (value === null) return;
-  localStorage.setItem(TOKEN_KEY, value.trim());
-  render();
+function showLogin(message = "") {
+  const gate = document.getElementById("admin-login-gate");
+  const error = document.getElementById("admin-login-error");
+  gate.classList.add("show");
+  gate.setAttribute("aria-hidden", "false");
+  document.body.classList.add("admin-locked");
+  error.textContent = message;
+  document.getElementById("admin-password").value = "";
 }
 
-document.getElementById("login-btn").addEventListener("click", configureAccess);
-document.getElementById("config-access-btn").addEventListener("click", configureAccess);
+function hideLogin() {
+  const gate = document.getElementById("admin-login-gate");
+  gate.classList.remove("show");
+  gate.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("admin-locked");
+  document.getElementById("admin-login-error").textContent = "";
+}
+
+async function validateStoredAccess() {
+  if (!token()) {
+    showLogin();
+    return false;
+  }
+  try {
+    await api("GET");
+    hideLogin();
+    return true;
+  } catch (error) {
+    localStorage.removeItem(TOKEN_KEY);
+    showLogin("La sesión no es válida. Inicia sesión nuevamente.");
+    return false;
+  }
+}
+
+function logout() {
+  localStorage.removeItem(TOKEN_KEY);
+  showLogin();
+}
+
+document.getElementById("logout-btn").addEventListener("click", logout);
+document.getElementById("logout-secondary-btn").addEventListener("click", logout);
+
+document.getElementById("admin-login-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const username = document.getElementById("admin-username").value.trim().toLowerCase();
+  const password = document.getElementById("admin-password").value;
+
+  if (username !== ADMIN_USERNAME) {
+    showLogin("Usuario o contraseña incorrectos.");
+    return;
+  }
+
+  localStorage.setItem(TOKEN_KEY, password);
+  try {
+    await api("GET");
+    hideLogin();
+    await render();
+  } catch (error) {
+    localStorage.removeItem(TOKEN_KEY);
+    showLogin("Usuario o contraseña incorrectos.");
+  }
+});
 
 document.getElementById("new-guide-btn").addEventListener("click", () => {
   document.getElementById("new-guide-panel").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -295,4 +349,6 @@ document.getElementById("guide-list").addEventListener("click", async (event) =>
 
 updateColombiaClock();
 setInterval(updateColombiaClock, 1000);
-render();
+validateStoredAccess().then((ok) => {
+  if (ok) render();
+});
