@@ -336,15 +336,16 @@ document.getElementById("generate-btn").addEventListener("click", () => {
 
 document.getElementById("guide-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const form = event.currentTarget;\n  const values = Object.fromEntries(new FormData(form).entries());
+  const form = event.currentTarget;
+  const values = Object.fromEntries(new FormData(form).entries());
   values.guide = String(values.guide || "").trim().toUpperCase();
   values.responsible = "Administración FOX GAMER";
 
   try {
     await api("POST", values);
-    event.currentTarget.reset();
+    form.reset();
     notify("Guía guardada");
-    render();
+    await render();
   } catch (error) {
     notify(error.message);
   }
