@@ -14,6 +14,7 @@ function json(statusCode, body) {
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://bsnbazyinaagjbuwqsce.supabase.co";
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LtWTS47B0PkF2-axs5p4gw_IotLxbUJ";
 
 function legacyDb() {
   const url = process.env.LIBSQL_URL;
@@ -100,6 +101,89 @@ async function recoverLegacyIfNeeded() {
 }
 
 
+
+async function importLegacyViaRpc(token, shipments, events) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/import_legacy_shipments`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
+    },
+    body: JSON.stringify({
+      p_token: token,
+      p_shipments: shipments,
+      p_events: events
+    })
+  });
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : {};
+  if (!response.ok) throw new Error(data?.message || "No se pudo importar la base histórica");
+  return data;
+}
+
+async function recoverLegacyDirect(token) {
+  const client = legacyDb();
+  if (!client) {
+    return { ok: false, reason: "LIBSQL_URL no está configurado en Production" };
+  }
+
+  const legacyShipments = await client.execute(
+    `SELECT id, guide, customer_name, customer_phone, product, address, city, driver,
+            status, delivery_window, created_at, updated_at
+     FROM shipments ORDER BY updated_at DESC LIMIT 500`
+  );
+
+  const rows = legacyShipments.rows || [];
+  if (!rows.length) {
+    return { ok: false, reason: "La base histórica está conectada, pero no contiene guías" };
+  }
+
+  const shipments = rows.map(row => ({
+    id: String(row.id),
+    guide: String(row.guide || "").trim().toUpperCase(),
+    customer_name: String(row.customer_name || ""),
+    customer_phone: String(row.customer_phone || ""),
+    product: String(row.product || ""),
+    address: String(row.address || ""),
+    city: String(row.city || ""),
+    driver: row.driver || null,
+    status: row.status || "Guía creada",
+    delivery_window: row.delivery_window || null,
+    created_at: toIso(row.created_at) || new Date().toISOString(),
+    updated_at: toIso(row.updated_at) || toIso(row.created_at) || new Date().toISOString()
+  }));
+
+  let events = [];
+  try {
+    const rs = await client.execute(
+      `SELECT shipment_id, status, note, responsible, created_at
+       FROM shipment_events ORDER BY created_at ASC`
+    );
+    const validIds = new Set(shipments.map(s => s.id));
+    events = (rs.rows || [])
+      .filter(row => validIds.has(String(row.shipment_id)))
+      .map(row => ({
+        shipment_id: String(row.shipment_id),
+        status: row.status || "Guía creada",
+        note: row.note || null,
+        responsible: row.responsible || "Administración FOX GAMER",
+        created_at: toIso(row.created_at) || new Date().toISOString()
+      }));
+  } catch (eventError) {
+    console.error("Legacy events unavailable:", eventError);
+  }
+
+  const result = await importLegacyViaRpc(token, shipments, events);
+  return {
+    ok: true,
+    source: "legacy-libsql",
+    found: shipments.length,
+    events_found: events.length,
+    ...result
+  };
+}
+
 function adminAuthStatus(event) {
   const expected = process.env.ADMIN_TOKEN;
   const received = event.headers["x-admin-token"] || "";
@@ -139,6 +223,23 @@ exports.handler = async (event) => {
   try {
     const auth = adminAuthStatus(event);
     if (!auth.ok) return json(401, { error: auth.reason });
+
+    const params = event.queryStringParameters || {};
+    if (event.httpMethod === "POST" && params.recover === "legacy") {
+      try {
+        const result = await recoverLegacyDirect(event.headers["x-admin-token"]);
+        return result.ok ? json(200, result) : json(404, result);
+      } catch (recoveryError) {
+        console.error("Legacy direct recovery failed:", recoveryError);
+        const msg = String(recoveryError?.message || recoveryError || "");
+        const diagnostic =
+          /LIBSQL_URL/i.test(msg) ? "LIBSQL_URL no está configurado en Production" :
+          /auth|token|unauthorized|401/i.test(msg) ? "No se pudo autenticar contra la base histórica" :
+          /fetch|connect|network|socket|ENOTFOUND/i.test(msg) ? "No se pudo conectar con la base histórica" :
+          msg || "No se pudieron recuperar las guías antiguas";
+        return json(500, { error: diagnostic });
+      }
+    }
 
     if (event.httpMethod === "GET") {
       let recovery = { recovered: 0, source: "supabase" };
