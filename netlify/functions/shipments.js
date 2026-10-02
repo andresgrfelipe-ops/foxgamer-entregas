@@ -15,6 +15,91 @@ function json(statusCode, body) {
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://bsnbazyinaagjbuwqsce.supabase.co";
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+function legacyDb() {
+  const url = process.env.LIBSQL_URL;
+  const authToken = process.env.LIBSQL_AUTH_TOKEN;
+  if (!url) return null;
+  const { createClient } = require("@libsql/client");
+  return createClient({ url, authToken });
+}
+
+function toIso(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number" || /^\d+$/.test(String(value))) {
+    const n = Number(value);
+    const date = new Date(n);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+async function recoverLegacyIfNeeded() {
+  const existing = await sb("shipments?select=id&limit=1");
+  if (existing?.length) return { recovered: 0, source: "supabase" };
+
+  const client = legacyDb();
+  if (!client) return { recovered: 0, source: "none" };
+
+  const legacyShipments = await client.execute(
+    `SELECT id, guide, customer_name, customer_phone, product, address, city, driver,
+            status, delivery_window, created_at, updated_at
+     FROM shipments ORDER BY updated_at DESC LIMIT 500`
+  );
+
+  const rows = legacyShipments.rows || [];
+  if (!rows.length) return { recovered: 0, source: "legacy-empty" };
+
+  const normalized = rows.map(row => ({
+    id: String(row.id),
+    guide: String(row.guide || "").trim().toUpperCase(),
+    customer_name: String(row.customer_name || ""),
+    customer_phone: String(row.customer_phone || ""),
+    product: String(row.product || ""),
+    address: String(row.address || ""),
+    city: String(row.city || ""),
+    driver: row.driver || null,
+    status: row.status || "Guía creada",
+    delivery_window: row.delivery_window || null,
+    created_at: toIso(row.created_at) || new Date().toISOString(),
+    updated_at: toIso(row.updated_at) || toIso(row.created_at) || new Date().toISOString()
+  }));
+
+  await sb("shipments?on_conflict=id", {
+    method: "POST",
+    headers: { "prefer": "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify(normalized)
+  });
+
+  const ids = normalized.map(row => row.id);
+  let recoveredEvents = 0;
+  if (ids.length) {
+    const legacyEvents = await client.execute(
+      `SELECT shipment_id, status, note, responsible, created_at
+       FROM shipment_events ORDER BY created_at ASC`
+    );
+    const events = (legacyEvents.rows || [])
+      .filter(row => ids.includes(String(row.shipment_id)))
+      .map(row => ({
+        shipment_id: String(row.shipment_id),
+        status: row.status || "Guía creada",
+        note: row.note || null,
+        responsible: row.responsible || "Administración FOX GAMER",
+        created_at: toIso(row.created_at) || new Date().toISOString()
+      }));
+    if (events.length) {
+      await sb("shipment_events", {
+        method: "POST",
+        body: JSON.stringify(events)
+      });
+      recoveredEvents = events.length;
+    }
+  }
+
+  return { recovered: normalized.length, recoveredEvents, source: "legacy-libsql" };
+}
+
+
 function isAdmin(event) {
   const expected = process.env.ADMIN_TOKEN;
   return Boolean(expected) && event.headers["x-admin-token"] === expected;
@@ -47,8 +132,15 @@ exports.handler = async (event) => {
     if (!isAdmin(event)) return json(401, { error: "No autorizado" });
 
     if (event.httpMethod === "GET") {
+      let recovery = { recovered: 0, source: "supabase" };
+      try {
+        recovery = await recoverLegacyIfNeeded();
+      } catch (recoveryError) {
+        console.error("Legacy recovery skipped:", recoveryError);
+      }
+
       const rows = await sb("shipments?select=id,guide,customer_name,customer_phone,product,address,city,driver,status,delivery_window,created_at,updated_at&order=updated_at.desc&limit=200");
-      return json(200, { shipments: rows || [] });
+      return json(200, { shipments: rows || [], recovery });
     }
 
     const body = event.body ? JSON.parse(event.body) : {};
