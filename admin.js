@@ -88,7 +88,15 @@ async function render() {
         </div>
       </article>`).join("");
   } catch (error) {
-    list.innerHTML = '<div class="empty">Configura el acceso de administrador para cargar las guías.</div>';
+    const message = String(error?.message || "Error");
+    const isAuth = /No autorizado|401/i.test(message);
+    list.innerHTML = '<div class="empty">' + (isAuth
+      ? 'Acceso rechazado (401). El token guardado en este navegador no coincide con ADMIN_TOKEN de Production.'
+      : 'No se pudieron cargar las guías: ' + message.replace(/[<>]/g, '')) + '</div>';
+    document.getElementById("stat-total").textContent = "!";
+    document.getElementById("stat-route").textContent = "!";
+    document.getElementById("stat-delivered").textContent = "!";
+    document.getElementById("stat-pending").textContent = "!";
   }
 }
 
