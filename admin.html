@@ -3,106 +3,165 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f4f6f9" />
+  <meta name="theme-color" content="#0d1120" />
   <title>Administración | FOX GAMER Entregas</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
-<body class="admin-shell">
-  <header class="admin-header">
+<body class="admin-shell admin-shell-pro">
+  <header class="admin-header admin-header-pro">
     <a class="brand" href="/">
       <span class="brand-mark">🦊</span>
       <span class="brand-copy"><strong>FOX GAMER</strong><small>ENTREGAS</small></span>
     </a>
-    <a class="secondary-btn" href="/">Ver seguimiento</a>
+    <div class="admin-header-tools">
+      <div class="colombia-clock">
+        <span>Hora Colombia</span>
+        <strong id="colombia-clock">—</strong>
+      </div>
+      <a class="secondary-btn" href="/">Seguimiento público</a>
+    </div>
   </header>
 
-  <main class="admin-main">
-    <div class="admin-title">
-      <div>
-        <h1>Centro de entregas</h1>
-        <p>Controla cada pedido desde la tienda hasta el cliente.</p>
+  <div class="admin-workspace">
+    <aside class="admin-sidebar" aria-label="Navegación del panel">
+      <div class="sidebar-title">Panel administrativo</div>
+      <nav class="sidebar-nav">
+        <a class="sidebar-link active" href="#envios"><span>▦</span> Envíos</a>
+        <a class="sidebar-link" href="/"><span>⌖</span> Seguimiento</a>
+        <a class="sidebar-link" href="#soporte"><span>◉</span> Soporte</a>
+        <a class="sidebar-link" href="#configuracion"><span>⚙</span> Configuración</a>
+      </nav>
+      <div class="sidebar-status">
+        <span class="status-dot"></span>
+        <div><strong>Sistema activo</strong><small>Base de datos conectada</small></div>
       </div>
-      <div class="admin-title-actions">
-        <button id="new-guide-btn" class="primary-btn" type="button">＋ Nueva guía</button>
-        <button id="login-btn" class="secondary-btn">Configurar acceso</button>
+    </aside>
+
+    <main class="admin-main admin-main-pro" id="envios">
+      <div class="admin-title">
+        <div>
+          <span class="admin-kicker">OPERACIÓN LOGÍSTICA</span>
+          <h1>Centro de entregas</h1>
+          <p>Controla pedidos, estados y seguimiento desde un solo lugar.</p>
+        </div>
+        <div class="admin-title-actions">
+          <button id="new-guide-btn" class="primary-btn" type="button">＋ Nueva guía</button>
+          <button id="login-btn" class="secondary-btn">Configurar acceso</button>
+        </div>
       </div>
-    </div>
 
-    <section class="stats-grid" aria-label="Resumen de entregas">
-      <article class="stat-card"><span>Envíos registrados</span><strong id="stat-total">—</strong><small>Base de datos activa</small></article>
-      <article class="stat-card"><span>En ruta</span><strong id="stat-route">—</strong><small>Seguimiento activo</small></article>
-      <article class="stat-card"><span>Entregados</span><strong id="stat-delivered">—</strong><small>Confirmados</small></article>
-      <article class="stat-card"><span>Pendientes</span><strong id="stat-pending">—</strong><small>Requieren gestión</small></article>
-    </section>
-
-    <div class="dashboard-grid">
-      <section class="panel" id="new-guide-panel">
-        <h2>Nueva guía</h2>
-        <form id="guide-form">
-          <div class="form-grid">
-            <div class="field">
-              <label for="guide">Número de guía</label>
-              <input id="guide" name="guide" placeholder="FG-2026-000001" required />
-            </div>
-            <div class="field">
-              <label for="status">Estado</label>
-              <select id="status" name="status">
-                <option>Guía creada</option>
-                <option>Recogido</option>
-                <option>En centro logístico</option>
-                <option>En tránsito</option>
-                <option>En reparto</option>
-                <option>Entregado</option>
-                <option>Novedad</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="customer_name">Cliente</label>
-              <input id="customer_name" name="customer_name" required />
-            </div>
-            <div class="field">
-              <label for="customer_phone">Teléfono</label>
-              <input id="customer_phone" name="customer_phone" required />
-            </div>
-            <div class="field full">
-              <label for="product">Artículo / pedido</label>
-              <input id="product" name="product" required />
-            </div>
-            <div class="field full">
-              <label for="address">Dirección</label>
-              <input id="address" name="address" required />
-            </div>
-            <div class="field">
-              <label for="city">Ciudad</label>
-              <input id="city" name="city" required />
-            </div>
-            <div class="field">
-              <label for="driver">Mensajero</label>
-              <input id="driver" name="driver" />
-            </div>
-            <div class="field full">
-              <label for="delivery_window">Ventana de entrega</label>
-              <input id="delivery_window" name="delivery_window" placeholder="Ej. Hoy 2:00 p. m. – 6:00 p. m." />
-            </div>
-            <div class="field full">
-              <label for="note">Nota inicial</label>
-              <textarea id="note" name="note"></textarea>
-            </div>
-          </div>
-          <div class="actions">
-            <button class="primary-btn" type="submit">Guardar guía</button>
-            <button id="generate-btn" class="secondary-btn" type="button">Generar número</button>
-          </div>
-        </form>
+      <section class="stats-grid" aria-label="Resumen de entregas">
+        <article class="stat-card stat-total"><span>Envíos registrados</span><strong id="stat-total">—</strong><small>Base de datos activa</small></article>
+        <article class="stat-card stat-route"><span>En ruta</span><strong id="stat-route">—</strong><small>Seguimiento activo</small></article>
+        <article class="stat-card stat-delivered"><span>Entregados</span><strong id="stat-delivered">—</strong><small>Confirmados</small></article>
+        <article class="stat-card stat-pending"><span>Pendientes</span><strong id="stat-pending">—</strong><small>Requieren gestión</small></article>
       </section>
 
-      <section class="panel recent-panel">
-        <h2>Envíos recientes</h2>
-        <p class="panel-subtitle">Guías generadas por FOX GAMER · Horario Colombia</p>
-        <div id="guide-list" class="guide-list"></div>
+      <section class="panel operations-panel">
+        <div>
+          <h2>Gestión de envíos</h2>
+          <p class="panel-subtitle">Filtra rápidamente las guías por estado.</p>
+        </div>
+        <div class="shipment-filters" role="group" aria-label="Filtros de guías">
+          <button class="filter-chip active" data-filter="all" type="button">Todos</button>
+          <button class="filter-chip" data-filter="pending" type="button">Pendientes</button>
+          <button class="filter-chip" data-filter="route" type="button">En ruta</button>
+          <button class="filter-chip" data-filter="delivered" type="button">Entregados</button>
+        </div>
       </section>
-    </div>
-  </main>
+
+      <div class="dashboard-grid dashboard-grid-pro">
+        <section class="panel recent-panel">
+          <div class="panel-heading-row">
+            <div>
+              <h2>Envíos recientes</h2>
+              <p class="panel-subtitle">Guías generadas por FOX GAMER · Horario Colombia</p>
+            </div>
+            <span class="live-pill">● En vivo</span>
+          </div>
+          <div id="guide-list" class="guide-list"></div>
+        </section>
+
+        <section class="panel new-guide-panel-pro" id="new-guide-panel">
+          <div class="panel-heading-row">
+            <div>
+              <h2>Nueva guía</h2>
+              <p class="panel-subtitle">Registra un envío sin salir del panel.</p>
+            </div>
+          </div>
+          <form id="guide-form">
+            <div class="form-grid">
+              <div class="field">
+                <label for="guide">Número de guía</label>
+                <input id="guide" name="guide" placeholder="FG-2026-000001" required />
+              </div>
+              <div class="field">
+                <label for="status">Estado</label>
+                <select id="status" name="status">
+                  <option>Guía creada</option>
+                  <option>Recogido</option>
+                  <option>En centro logístico</option>
+                  <option>En tránsito</option>
+                  <option>En reparto</option>
+                  <option>Entregado</option>
+                  <option>Novedad</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="customer_name">Cliente</label>
+                <input id="customer_name" name="customer_name" required />
+              </div>
+              <div class="field">
+                <label for="customer_phone">Teléfono</label>
+                <input id="customer_phone" name="customer_phone" required />
+              </div>
+              <div class="field full">
+                <label for="product">Artículo / pedido</label>
+                <input id="product" name="product" required />
+              </div>
+              <div class="field full">
+                <label for="address">Dirección</label>
+                <input id="address" name="address" required />
+              </div>
+              <div class="field">
+                <label for="city">Ciudad</label>
+                <input id="city" name="city" required />
+              </div>
+              <div class="field">
+                <label for="driver">Mensajero</label>
+                <input id="driver" name="driver" />
+              </div>
+              <div class="field full">
+                <label for="delivery_window">Ventana de entrega</label>
+                <input id="delivery_window" name="delivery_window" placeholder="Ej. Hoy 2:00 p. m. – 6:00 p. m." />
+              </div>
+              <div class="field full">
+                <label for="note">Nota inicial</label>
+                <textarea id="note" name="note"></textarea>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="primary-btn" type="submit">Guardar guía</button>
+              <button id="generate-btn" class="secondary-btn" type="button">Generar número</button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <section class="admin-info-grid">
+        <article class="panel" id="soporte">
+          <h2>Soporte</h2>
+          <p class="panel-subtitle">Acceso rápido a revisión de guías y seguimiento.</p>
+          <a class="secondary-btn inline-btn" href="/">Abrir seguimiento público</a>
+        </article>
+        <article class="panel" id="configuracion">
+          <h2>Configuración</h2>
+          <p class="panel-subtitle">El panel muestra fechas y horas usando America/Bogota.</p>
+          <button id="config-access-btn" class="secondary-btn inline-btn" type="button">Configurar acceso</button>
+        </article>
+      </section>
+    </main>
+  </div>
 
   <div id="toast" class="toast"></div>
   <script src="/admin.js"></script>
