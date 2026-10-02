@@ -42,8 +42,12 @@ function renderGuide(record) {
       <span class="status-badge">${escapeHtml(record.status || "En proceso")}</span>
       <h3>${escapeHtml(record.guide)}</h3>
       <div class="result-grid">
+        <div class="result-item"><span>Cliente</span><strong>${escapeHtml(record.customer_name || "Cliente FOX GAMER")}</strong></div>
+        <div class="result-item"><span>Cédula</span><strong>${escapeHtml(record.customer_document || "No registrada")}</strong></div>
+        <div class="result-item"><span>Teléfono</span><strong>${escapeHtml(record.customer_phone || "No registrado")}</strong></div>
         <div class="result-item"><span>Pedido</span><strong>${escapeHtml(record.product || "Pedido FOX GAMER")}</strong></div>
-        <div class="result-item"><span>Destino</span><strong>${escapeHtml(record.city || "Por confirmar")}</strong></div>
+        <div class="result-item"><span>Ciudad de entrega</span><strong>${escapeHtml(record.city || "Por confirmar")}</strong></div>
+        <div class="result-item"><span>Dirección de entrega</span><strong>${escapeHtml(record.address || "Registrada en el sistema")}</strong></div>
         <div class="result-item"><span>Mensajero</span><strong>${escapeHtml(record.driver || "Por asignar")}</strong></div>
         <div class="result-item"><span>Ventana de entrega</span><strong>${escapeHtml(record.delivery_window || "Por confirmar")}</strong></div>
         <div class="result-item"><span>Última actualización</span><strong>${record.updated_at ? formatColombiaDateTime(record.updated_at) : "Sin dato"}</strong></div>
