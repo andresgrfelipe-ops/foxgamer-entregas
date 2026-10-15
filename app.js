@@ -95,3 +95,9 @@ form.addEventListener("submit", async (event) => {
       </article>`;
   }
 });
+
+const linkedGuide = new URLSearchParams(window.location.search).get('guia');
+if (linkedGuide) {
+  input.value = linkedGuide.slice(0,100);
+  form.requestSubmit();
+}

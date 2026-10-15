@@ -3,7 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "netlify dev"
+    "dev": "netlify dev",
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
     "@libsql/client": "latest"
