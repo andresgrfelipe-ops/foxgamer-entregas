@@ -101,6 +101,7 @@
               <p class="panel-subtitle">Registra un envío sin salir del panel.</p>
             </div>
           </div>
+          <p id="email-service-status" class="panel-subtitle" role="status">Comprobando avisos por correo…</p>
           <form id="guide-form">
             <div class="form-grid">
               <div class="field">
@@ -126,6 +127,11 @@
               <div class="field">
                 <label for="customer_phone">Teléfono</label>
                 <input id="customer_phone" name="customer_phone" required />
+              </div>
+              <div class="field">
+                <label for="customer_email">Correo del destinatario</label>
+                <input id="customer_email" name="customer_email" type="email" maxlength="254" autocomplete="email" placeholder="cliente@ejemplo.com" />
+                <small>Recibirá avisos de creación y actualización cuando el servicio esté activo.</small>
               </div>
               <div class="field">
                 <label for="customer_document">Cédula de ciudadanía</label>
@@ -211,6 +217,6 @@
       <a class="admin-login-back" href="/">← Volver al seguimiento</a>
     </div>
   </div>
-  <script src="/admin.js?v=20261002-0745"></script>
+  <script src="/admin.js?v=20261015-email"></script>
 </body>
 </html>

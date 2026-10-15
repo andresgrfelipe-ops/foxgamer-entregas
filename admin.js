@@ -7,6 +7,24 @@ let allShipments = [];
 let activeFilter = "all";
 let searchQuery = "";
 let recoveryAttempted = false;
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+const emailLabels = {pending:'Aviso pendiente',sending:'Enviando aviso',sent:'Aceptado por el servicio de correo',failed:'Aviso fallido: revisar envío',cancelled:'Aviso cancelado'};
+
+async function showEmailServiceStatus() {
+  const element = document.getElementById('email-service-status');
+  try {
+    const response = await fetch('/.netlify/functions/email-status',{cache:'no-store'});
+    if (!response.ok) throw new Error('unavailable');
+    const data = await response.json();
+    element.textContent = data.enabled
+      ? 'Avisos automáticos activos. Se enviarán al correo registrado en cada guía.'
+      : 'Envío de correos pendiente de activación. Puedes guardar el correo del cliente; aún no se están enviando avisos.';
+  } catch {
+    element.textContent = 'No se pudo comprobar el servicio de correo. Guardar una guía no confirma el envío de un aviso.';
+  }
+}
 
 function colombiaYear() {
   return new Intl.DateTimeFormat("en-US", {
@@ -96,6 +114,7 @@ async function api(method = "GET", body) {
   if (!response.ok) {
     const message = data?.message === "not_authorized"
       ? "El token no coincide con el acceso administrador"
+      : data?.message === 'invalid_customer_email' ? 'Revisa el correo del destinatario'
       : (data?.message || data?.error || "Error al conectar con la base de datos");
     throw new Error(message);
   }
@@ -126,6 +145,7 @@ function filteredShipments() {
     g.guide,
     g.customer_name,
     g.customer_phone,
+    g.customer_email,
     g.product,
     g.address,
     g.city,
@@ -146,17 +166,19 @@ function renderList() {
     <article class="guide-row guide-row-pro">
       <div class="guide-main">
         <div class="guide-topline">
-          <h3>${g.guide}</h3>
-          <span class="shipment-status ${statusClass(g.status)}">${g.status || "Guía creada"}</span>
+          <h3>${escapeHtml(g.guide)}</h3>
+          <span class="shipment-status ${statusClass(g.status)}">${escapeHtml(g.status || "Guía creada")}</span>
         </div>
         <p class="guide-date">${formatColombiaDateTime(g.created_at || g.updated_at)}</p>
-        <p class="guide-customer"><strong>${g.customer_name || "Cliente"}</strong> · ${g.product || "Pedido FOX GAMER"}</p>
-        <p class="guide-location">${g.city || "Ciudad por confirmar"}${g.driver ? " · Mensajero: " + g.driver : ""}</p>
+        <p class="guide-customer"><strong>${escapeHtml(g.customer_name || "Cliente")}</strong> · ${escapeHtml(g.product || "Pedido FOX GAMER")}</p>
+        <p class="guide-location">${escapeHtml(g.city || "Ciudad por confirmar")}${g.driver ? " · Mensajero: " + escapeHtml(g.driver) : ""}</p>
+        <p class="guide-location">${escapeHtml(g.customer_email || 'Sin correo registrado')}${g.customer_email && g.email_delivery_status ? ' · '+escapeHtml(emailLabels[g.email_delivery_status] || '') : ''}</p>
       </div>
       <div class="row-actions">
         <a class="guide-view-btn" href="/admin/documento/${encodeURIComponent(g.guide)}" title="Abrir guía">Ver guía</a>
-        <button class="icon-btn" data-action="advance" data-id="${g.id}" data-status="${g.status}" title="Avanzar estado">↻</button>
-        <button class="icon-btn" data-action="copy" data-guide="${g.guide}" title="Copiar guía">⧉</button>
+        <button class="icon-btn" data-action="email" data-id="${g.id}" title="Editar correo del destinatario">✉</button>
+        <button class="icon-btn" data-action="advance" data-id="${g.id}" data-status="${escapeHtml(g.status)}" title="Avanzar estado">↻</button>
+        <button class="icon-btn" data-action="copy" data-guide="${escapeHtml(g.guide)}" title="Copiar guía">⧉</button>
         <button class="icon-btn danger-icon" data-action="delete" data-id="${g.id}" title="Eliminar">⌫</button>
       </div>
     </article>`).join("");
@@ -340,6 +362,8 @@ document.getElementById("guide-form").addEventListener("submit", async (event) =
   const values = Object.fromEntries(new FormData(form).entries());
   values.guide = String(values.guide || "").trim().toUpperCase();
   values.responsible = "Administración FOX GAMER";
+  const submit = form.querySelector('button[type="submit"]');
+  submit.disabled = true;
 
   try {
     await api("POST", values);
@@ -348,13 +372,28 @@ document.getElementById("guide-form").addEventListener("submit", async (event) =
     await render();
   } catch (error) {
     notify(error.message);
+  } finally {
+    submit.disabled = false;
   }
 });
 
 document.getElementById("guide-list").addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button) return;
+  button.disabled = true;
   try {
+    if (button.dataset.action === 'email') {
+      const shipment = allShipments.find(item => String(item.id) === button.dataset.id);
+      if (!shipment) return;
+      const entered = prompt('Correo del destinatario (déjalo vacío para desactivar sus avisos):',shipment.customer_email || '');
+      if (entered === null) return;
+      const email = entered.trim().toLowerCase();
+      if (email && (email.length>254 || !/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(email))) throw new Error('Revisa el correo del destinatario');
+      if (email === (shipment.customer_email || '')) return;
+      await api('PATCH',{id:shipment.id,status:shipment.status,customer_email:email,responsible:'Administración FOX GAMER'});
+      notify('Correo actualizado');
+      await render();
+    }
     if (button.dataset.action === "advance") {
       await api("PATCH", {
         id: button.dataset.id,
@@ -376,9 +415,12 @@ document.getElementById("guide-list").addEventListener("click", async (event) =>
     }
   } catch (error) {
     notify(error.message);
+  } finally {
+    button.disabled = false;
   }
 });
 
+showEmailServiceStatus();
 updateColombiaClock();
 setInterval(updateColombiaClock, 1000);
 validateStoredAccess().then((ok) => {

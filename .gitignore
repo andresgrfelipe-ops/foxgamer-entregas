@@ -1,0 +1,6 @@
+dist/
+node_modules/
+.netlify/
+supabase/.temp/
+.env
+.env.*
